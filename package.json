@@ -2,13 +2,16 @@
     "name": "mergebot",
     "private": true,
     "scripts": {
-      "sync": "tsx scripts/sync.ts"
+        "sync": "tsx scripts/sync.ts",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
     },
     "dependencies": {
-      "@octokit/rest": "^21.0.0"
+        "@octokit/rest": "^21.0.0"
     },
     "devDependencies": {
-      "tsx": "^4.0.0",
-      "typescript": "^5.0.0"
+        "prettier": "^3.9.4",
+        "tsx": "^4.0.0",
+        "typescript": "^5.0.0"
     }
 }
