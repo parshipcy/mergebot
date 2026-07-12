@@ -39,40 +39,33 @@ function loadState() {
 }
 
 async function fetchMergedPRs(repo) {
-  // GitHub’s API needs owner and repo separately, not one combined string
-  const [owner, name] = repo.split("/");
   const results = [];
   let page = 1;
 
   while (true) {
-    const { data: pulls } = await octokit.pulls.list({
-      owner,
-      repo: name,
-      state: "closed", // state: merged - not supported by GitHub API
-      sort: "updated", // Sort by last update time
-      direction: "desc", // Newest updates first
+    // optimized version - switch from pulls.list to the Search API
+    const { data } = await octokit.request("GET /search/issues", {
+      q: `is:pr author:${username} is:merged repo:${repo}`,
+      advanced_search: true, // Use GitHub's newer search engine
       per_page: 100,
       page,
     });
 
-    if (pulls.length === 0) break;
+    if (data.items.length === 0) break;
 
-    for (const pr of pulls) {
-      if (!pr.merged_at) continue; // no merge date means -> not merged
-      if (pr.user?.login?.toLowerCase() !== username.toLowerCase()) continue;
-
+    for (const item of data.items) {
       results.push({
-        key: makeKey(repo, pr.number),
+        key: makeKey(repo, item.number),
         repo,
-        number: pr.number,
-        title: pr.title,
-        url: pr.html_url, // Full GitHub PR link
-        mergedAt: pr.merged_at, // ISO date string
+        number: item.number,
+        title: item.title,
+        url: item.html_url, // Full GitHub PR link
+        mergedAt: item.pull_request.merged_at, // ISO date string
       });
     }
 
     // as GitHub returns at most 100 PRs per page
-    if (pulls.length < 100) break;
+    if (page * 100 >= data.total_count) break;
     page++;
   }
 
