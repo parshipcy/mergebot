@@ -1,16 +1,16 @@
 {
-    "name": "mergebot",
-    "type": "module",
-    "private": true,
-    "scripts": {
-        "sync": "node --env-file=.env scripts/sync.js",
-        "format": "prettier --write .",
-        "format:check": "prettier --check ."
-    },
-    "dependencies": {
-        "@octokit/rest": "^21.0.0"
-    },
-    "devDependencies": {
-        "prettier": "^3.9.4"
-    }
+  "name": "mergebot",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "sync": "node --env-file=.env scripts/sync.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.4"
+  }
 }

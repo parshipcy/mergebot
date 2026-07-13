@@ -1,7 +1,7 @@
 [
-    "jaegertracing/jaeger-ui",
-    "twentyhq/twenty",
-    "activepieces/activepieces",
-    "sugarlabs/musicblocks",
-    "mcp-use/mcp-use"
+  "jaegertracing/jaeger-ui",
+  "twentyhq/twenty",
+  "activepieces/activepieces",
+  "sugarlabs/musicblocks",
+  "mcp-use/mcp-use"
 ]
