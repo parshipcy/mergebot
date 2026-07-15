@@ -20,7 +20,7 @@ function makeKey(repo, number) {
 
 function loadRepos() {
   const filePath = "config/repos.json";
-  const raw = readFileSync(filePath, "utf8");
+  const raw = readFileSync(filePath, "utf8"); // Read file as text string
   return JSON.parse(raw);
 }
 
@@ -75,6 +75,8 @@ async function fetchMergedPRs(repo) {
 async function main() {
   const repos = loadRepos();
   const state = loadState();
+  const known = new Set(state.processed);
+  let newCount = 0;
 
   console.log(`Checking ${repos.length} repos for @${username}...\n`);
 
@@ -86,9 +88,31 @@ async function main() {
     console.log(`  Found ${merged.length} merged PR(s) by you`);
 
     for (const pr of merged) {
-      console.log(`    ${pr.key} - ${pr.title}`);
+      if (known.has(pr.key)) {
+        console.log(`    [skip] ${pr.key}`);
+        continue;
+      }
+
+      console.log(`    [NEW]  ${pr.key} - ${pr.title}`);
+
+      // Add key like "twentyhq/twenty#18345" to the list
+      state.processed.push(pr.key);
+      // Add full PR object (title, url, etc.) for README later
+      state.entries.push(pr);
+      // Mark as known so the same PR isn't added twice in one run
+      known.add(pr.key);
+
+      newCount++;
     }
+
     console.log("");
+  }
+
+  console.log(`\nSummary: ${newCount} new PR(s) found.`);
+
+  if (newCount === 0) {
+    console.log("Nothing to update.");
+    return;
   }
 }
 
