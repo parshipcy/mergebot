@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const token = process.env.POW_REPO_TOKEN;
@@ -36,6 +36,85 @@ function loadState() {
 
   const raw = readFileSync(filePath, "utf8");
   return JSON.parse(raw);
+}
+
+function saveState(state) {
+  const filePath = join(powDir, "processed.json");
+  const content = JSON.stringify(state, null, 2) + "\n";
+  writeFileSync(filePath, content);
+}
+
+function generateReadme(state) {
+  const readmePath = join(powDir, "README.md");
+  const startMarker = "<!-- mergebot:start -->";
+  const endMarker = "<!-- mergebot:end -->";
+
+  let existing = existsSync(readmePath)
+    ? readFileSync(readmePath, "utf8")
+    : `# Open Source Contributions\n\n${startMarker}\n${endMarker}\n`;
+
+  // Group entries by repo
+  const byRepo = new Map();
+  for (const entry of state.entries) {
+    if (!byRepo.has(entry.repo)) {
+      byRepo.set(entry.repo, []);
+    }
+    byRepo.get(entry.repo).push(entry);
+  }
+
+  // Build the auto-generated section
+  let section = "";
+
+  if (state.entries.length === 0) {
+    section = "\n_No merged PRs recorded yet._\n";
+  } else {
+    for (const [repo, entries] of byRepo) {
+      // Sort newest first
+      entries.sort((a, b) => new Date(b.mergedAt) - new Date(a.mergedAt));
+
+      const displayName = repo.split("/")[1];
+      section += `\n## ${displayName}\n\n`;
+      section += `| PR | Title | Type | Merged |\n`;
+      section += `|----|-------|------|--------|\n`;
+
+      for (const e of entries) {
+        const type = e.type ?? inferType(e.title);
+        // If a title contained |, it would break the markdown table columns. Escape pipe characters.
+        const safeTitle = e.title.replace(/\|/g, "\\|");
+        section += `| [#${e.number}](${e.url}) | ${safeTitle} | ${type} | ${formatDate(e.mergedAt)} |\n`;
+      }
+
+      section += `\n**Total:** ${entries.length} merged PR(s)\n`;
+    }
+  }
+
+  // Replace only between markers
+  if (existing.includes(startMarker) && existing.includes(endMarker)) {
+    // everything before the start marker + startMarker - put the marker back
+    const before = existing.split(startMarker)[0] + startMarker;
+    // marker + everything after end marker
+    const after = endMarker + existing.split(endMarker)[1];
+    // stitch: intro + new tables + closing marker
+    return before + section + after;
+  }
+
+  // Fallback if markers missing
+  return existing + `\n\n${startMarker}${section}${endMarker}\n`;
+}
+
+function inferType(title) {
+  if (/^fix/i.test(title)) return "🐛 Bug Fix";
+  if (/^feat/i.test(title)) return "✨ Feature";
+  if (/^docs/i.test(title)) return "📖 Docs";
+  if (/^refactor/i.test(title)) return "♻️ Refactor";
+  return "🔧 Other";
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
 }
 
 async function fetchMergedPRs(repo) {
@@ -114,6 +193,11 @@ async function main() {
     console.log("Nothing to update.");
     return;
   }
+
+  console.log("Saving files...");
+  saveState(state);
+  writeFileSync(join(powDir, "README.md"), generateReadme(state));
+  console.log("Done! Updated processed.json and README.md in", powDir);
 }
 
 main().catch((err) => {
