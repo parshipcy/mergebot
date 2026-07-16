@@ -3,7 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "sync": "node --env-file=.env scripts/sync.js",
+    "sync": "node scripts/sync.js",
+    "sync:local": "node --env-file=.env scripts/sync.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

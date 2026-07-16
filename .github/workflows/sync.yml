@@ -1,0 +1,50 @@
+name: Sync merged PRs to merge-log
+
+on:
+  schedule:
+    - cron: "0 */24 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout mergebot
+        uses: actions/checkout@v4
+
+      - name: Checkout merge-log repo
+        uses: actions/checkout@v4
+        with:
+          repository: parshipcy/merge-log
+          token: ${{ secrets.POW_REPO_TOKEN }}
+          path: pow
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run sync
+        run: npm run sync
+        env:
+          POW_REPO_TOKEN: ${{ secrets.POW_REPO_TOKEN }}
+          GITHUB_USERNAME: parshipcy
+          POW_DIR: pow
+
+      - name: Open PR on merge-log
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.POW_REPO_TOKEN }}
+          path: pow
+          commit-message: "docs: sync merged open-source PRs"
+          title: "docs: sync merged open-source PRs"
+          body: |
+            Automated update from mergebot.
+
+            Synced merged PRs for @parshipcy.
+          branch: bot/sync-merged-prs
+          delete-branch: true
