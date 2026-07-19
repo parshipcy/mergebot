@@ -1,4 +1,4 @@
-name: Sync merged PRs to merge-log
+name: Sync merged PRs to mergelog
 
 on:
   schedule:
@@ -13,10 +13,10 @@ jobs:
       - name: Checkout mergebot
         uses: actions/checkout@v4
 
-      - name: Checkout merge-log repo
+      - name: Checkout mergelog repo
         uses: actions/checkout@v4
         with:
-          repository: parshipcy/merge-log
+          repository: parshipcy/mergelog
           token: ${{ secrets.POW_REPO_TOKEN }}
           path: pow
 
@@ -35,7 +35,7 @@ jobs:
           GITHUB_USERNAME: parshipcy
           POW_DIR: pow
 
-      - name: Open PR on merge-log
+      - name: Open PR on mergelog
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.POW_REPO_TOKEN }}
