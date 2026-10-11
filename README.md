@@ -1,6 +1,6 @@
 # MergeBot
 
-A small GitHub Action that watches your open-source repos for merged PRs and opens update PRs on [mergelog](https://github.com/parshipcy/mergelog).
+A small GitHub Action that watches your open-source repos for merged PRs and opens update PRs on your chosen repo (let's say `mergelog`).
 
 ![Architecture](./assets/Untitled-2026-07-12-2319.png)
 
@@ -17,7 +17,7 @@ A small GitHub Action that watches your open-source repos for merged PRs and ope
 
 1. Fork or clone this repo, and create a second repo for your portfolio (e.g. `your-username/mergelog`).
 2. Create a [fine-grained PAT](https://github.com/settings/tokens) with **Contents** and **Pull requests** access to both repos.
-3. Add the PAT as `POW_REPO_TOKEN` in **mergebot → Settings  Secrets → Actions**.
+3. Add the PAT as `POW_REPO_TOKEN` in **mergebot → Settings → Secrets → Actions**.
 4. Edit `config/repos.json` with the repos you want to watch.
 5. In `.github/workflows/sync.yml`, replace `parshipcy/mergelog` and `GITHUB_USERNAME` with yours.
 6. Seed your mergelog repo on `main` with `processed.json` (`{ "processed": [], "entries": [] }`) and a `README.md` that includes `<!-- mergebot:start -->` and `<!-- mergebot:end -->`.
@@ -34,4 +34,3 @@ git clone https://github.com/YOUR_USERNAME/mergelog.git pow
 npm run sync:local
 ```
 ---
-Made with ❤️ by Parship
