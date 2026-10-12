@@ -25,6 +25,8 @@ A small GitHub Action that watches your open-source repos for merged PRs and ope
 
 The action syncs merged PRs and opens a PR on your mergelog repo. Review and merge it to update your portfolio.
 
+![Opened PR](./assets/Screenshot.png)
+
 **Local test**:
 
 ```bash
@@ -33,4 +35,3 @@ git clone https://github.com/YOUR_USERNAME/mergelog.git pow
 # create .env with POW_REPO_TOKEN, GITHUB_USERNAME, POW_DIR=pow
 npm run sync:local
 ```
----
